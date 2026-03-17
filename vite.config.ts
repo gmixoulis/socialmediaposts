@@ -11,4 +11,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    port: 5173,
+    proxy: {
+      // All /api/* requests are forwarded to the Express backend
+      "/api": {
+        target: process.env.VITE_API_URL || "http://backend1:5000",
+        changeOrigin: true,
+      },
+    },
+  },
 })
+

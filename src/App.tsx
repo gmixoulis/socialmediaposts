@@ -1,21 +1,34 @@
-import { Button } from "@/components/ui/button"
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Navbar } from "@/components/Navbar";
+import { FeedPage } from "@/pages/FeedPage";
+import { AuthPage } from "@/pages/AuthPage";
+import { LikedPostsPage } from "@/pages/LikedPostsPage";
+import { NewPostPage } from "@/pages/NewPostPage";
 
-export function App() {
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1 } },
+});
+
+export default function App() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
-    </div>
-  )
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-background text-foreground">
+            <Navbar />
+            <main>
+              <Routes>
+                <Route path="/"       element={<FeedPage />} />
+                <Route path="/auth"   element={<AuthPage />} />
+                <Route path="/liked"  element={<LikedPostsPage />} />
+                <Route path="/new"    element={<NewPostPage />} />
+              </Routes>
+            </main>
+          </div>
+        </BrowserRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
 }
-
-export default App

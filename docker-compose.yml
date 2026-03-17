@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: spm_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spm_user
+      POSTGRES_PASSWORD: spm_pass
+      POSTGRES_DB: social_posts
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spm_user -d social_posts"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend1:
+    build:
+      context: ./backend1
+      dockerfile: Dockerfile
+    container_name: spm_backend1
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: file:./dev.db
+      JWT_SECRET: change-me-in-production
+      JWT_EXPIRE_HOURS: "24"
+      PORT: "5000"
+      CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend1_data:/app/dev.db
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: spm_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend1
+
+volumes:
+  postgres_data:
+  backend1_data:
