@@ -14,9 +14,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // All /api/* requests are forwarded to the Express backend
+      // All /api/* requests are forwarded to the Hono backend
       "/api": {
-        target: process.env.VITE_API_URL || "http://backend1:5000",
+        target: process.env.VITE_API_URL || "http://localhost:5000",
         changeOrigin: true,
       },
     },

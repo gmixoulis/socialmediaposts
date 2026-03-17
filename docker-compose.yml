@@ -34,16 +34,7 @@ services:
     volumes:
       - backend1_data:/app/dev.db
 
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend.Dockerfile
-    container_name: spm_frontend
-    restart: unless-stopped
-    ports:
-      - "5173:5173"
-    depends_on:
-      - backend1
+
 
 volumes:
   postgres_data:

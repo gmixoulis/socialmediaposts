@@ -2,19 +2,15 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postsApi } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/lib/useAuthStore";
 import { Loader2, PenSquare } from "lucide-react";
 
 export function NewPostPage() {
-  const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
   const [title, setTitle] = useState("");
   const [body, setBody]   = useState("");
   const [error, setError] = useState("");
-
-  if (!isAuthenticated) { navigate("/auth"); return null; }
 
   const createMutation = useMutation({
     mutationFn: postsApi.create,

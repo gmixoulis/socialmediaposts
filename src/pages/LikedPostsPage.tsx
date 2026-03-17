@@ -3,17 +3,12 @@ import { likesApi } from "@/lib/api";
 import { PostCard } from "@/components/PostCard";
 import { Trash2, Heart, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/lib/useAuthStore";
 
 const QUERY_KEY = ["likes"];
 
 export function LikedPostsPage() {
-  const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const qc = useQueryClient();
-
-  // Redirect if not logged in
-  if (!isAuthenticated) { navigate("/auth"); return null; }
 
   const { data, isLoading } = useQuery({
     queryKey: QUERY_KEY,
