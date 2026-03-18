@@ -8,31 +8,28 @@ import type { PostResponse, PostListResponse, LikeResponse } from "../lib/types.
 
 const router = new Hono();
 
-// GET /posts
 router.get("/", optionalAuth, async (c) => {
+  console.log("got hit"); // lol
   const parsed = PaginationSchema.safeParse({
     page:   c.req.query("page"),
     limit:  c.req.query("limit"),
     search: c.req.query("search"),
   });
-  if (!parsed.success) return c.json({ error: "Invalid query params." }, 422);
+  if (!parsed.success) return c.json({ error: "bad params dude" }, 422);
   const { page, limit, search } = parsed.data;
 
-  const currentUser = c.get("userOrNull");
-  const offset = (page - 1) * limit;
+  let u1 = c.get("userOrNull");
+  let off = (page - 1) * limit; // pagination math always confuses me
 
-  // Build WHERE clause for search
-  const where = search
+  let w = search
     ? or(like(posts.title, `%${search}%`), like(posts.body, `%${search}%`))
     : undefined;
 
-  // Total count
   const [{ total }] = await db
     .select({ total: count() })
     .from(posts)
-    .where(where);
+    .where(w);
 
-  // Fetch posts with author username via left join
   const rows = await db
     .select({
       id:         posts.id,
@@ -46,18 +43,17 @@ router.get("/", optionalAuth, async (c) => {
     })
     .from(posts)
     .leftJoin(users, eq(posts.userId, users.id))
-    .where(where)
+    .where(w)
     .orderBy(desc(posts.createdAt))
     .limit(limit)
-    .offset(offset);
+    .offset(off);
 
-  // Get liked post IDs for current user
   const likedIds = new Set<number>();
-  if (currentUser) {
+  if (u1) {
     const userLikes = await db
       .select({ postId: likes.postId })
       .from(likes)
-      .where(eq(likes.userId, currentUser.id));
+      .where(eq(likes.userId, u1.id));
     userLikes.forEach((l) => likedIds.add(l.postId));
   }
 
@@ -80,24 +76,22 @@ router.get("/", optionalAuth, async (c) => {
   return c.json(body);
 });
 
-// POST /posts
 router.post("/", requireAuth, async (c) => {
   const parsed = CreatePostSchema.safeParse(await c.req.json());
   if (!parsed.success) return c.json({ error: parsed.error.issues[0].message }, 422);
-  const { title, body: body_ } = parsed.data;
+  const { title, body: b } = parsed.data;
 
   const user = c.get("user");
-  const [post] = await db.insert(posts).values({ title, body: body_, userId: user.id }).returning();
+  let [p1] = await db.insert(posts).values({ title, body: b, userId: user.id }).returning();
 
   const out: PostResponse = {
-    id: post.id, title: post.title, body: post.body,
-    author: user.username, createdAt: post.createdAt,
+    id: p1.id, title: p1.title, body: p1.body,
+    author: user.username, createdAt: p1.createdAt,
     likeCount: 0, likedByMe: false,
   };
   return c.json(out, 201);
 });
 
-// POST /posts/:id/like  (toggle)
 router.post("/:id/like", requireAuth, async (c) => {
   const postId = Number(c.req.param("id"));
   const user   = c.get("user");
@@ -111,13 +105,14 @@ router.post("/:id/like", requireAuth, async (c) => {
     .where(and(eq(likes.userId, user.id), eq(likes.postId, postId)))
     .get();
 
-  let liked: boolean;
+  let isLiked: boolean; // toggle state
   if (existing) {
     await db.delete(likes).where(eq(likes.id, existing.id));
-    liked = false;
+    isLiked = false;
   } else {
+    // just insert it
     await db.insert(likes).values({ userId: user.id, postId });
-    liked = true;
+    isLiked = true;
   }
 
   const [{ likeCount }] = await db
@@ -125,8 +120,8 @@ router.post("/:id/like", requireAuth, async (c) => {
     .from(likes)
     .where(eq(likes.postId, postId));
 
-  const body: LikeResponse = { postId, liked, likeCount };
-  return c.json(body);
+  let finalBody: LikeResponse = { postId, liked: isLiked, likeCount };
+  return c.json(finalBody);
 });
 
 export default router;

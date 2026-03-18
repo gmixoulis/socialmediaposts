@@ -3,21 +3,21 @@ import { useAuthStore } from "@/lib/useAuthStore";
 import { Heart, PenSquare, LogOut, LogIn, Newspaper } from "lucide-react";
 
 export function Navbar() {
-  const { isAuthenticated, user, logout } = useAuthStore();
-  const navigate = useNavigate();
+  const { isAuthenticated: isAuth, user: u, logout: doLogout } = useAuthStore();
+  const nav = useNavigate();
 
-  const handleLogout = () => { logout(); navigate("/"); };
+  let handleLogout = () => { doLogout(); nav("/"); };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        {/* Logo */}
+        {/* the top left thingy */}
         <NavLink to="/" className="flex items-center gap-2 font-bold text-lg tracking-tight">
           <Newspaper className="h-5 w-5 text-primary" />
           <span>SocialPosts</span>
         </NavLink>
 
-        {/* Navigation */}
+        {/* links n stuff */}
         <nav className="flex items-center gap-1">
           <NavLink
             to="/"
@@ -30,7 +30,7 @@ export function Navbar() {
             Feed
           </NavLink>
 
-          {isAuthenticated ? (
+          {isAuth ? (
             <>
               <NavLink
                 to="/liked"
@@ -61,7 +61,7 @@ export function Navbar() {
                 className="flex items-center gap-1.5 ml-2 px-3 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
               >
                 <LogOut className="h-3.5 w-3.5" />
-                {user?.username ?? "Logout"}
+                {u?.username ?? "Logout"}
               </button>
             </>
           ) : (

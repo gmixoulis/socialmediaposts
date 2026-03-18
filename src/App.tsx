@@ -8,18 +8,19 @@ import { AuthPage } from "@/pages/AuthPage";
 import { LikedPostsPage } from "@/pages/LikedPostsPage";
 import { NewPostPage } from "@/pages/NewPostPage";
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1 } },
+let qc = new QueryClient({
+  defaultOptions: { queries: { retry: 1 } }, // do not retry too much
 });
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={qc}>
       <ThemeProvider>
         <BrowserRouter>
           <div className="min-h-screen bg-background text-foreground">
             <Navbar />
             <main>
+              { /* all the routes go here */ }
               <Routes>
                 <Route path="/"       element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
                 <Route path="/auth"   element={<AuthPage />} />
