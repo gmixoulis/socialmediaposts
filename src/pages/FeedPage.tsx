@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { postsApi } from "@/lib/api";
 import { PostCard } from "@/components/PostCard";
-import { Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const QUERY_KEY_BASE = "posts";
 
@@ -65,8 +66,20 @@ export function FeedPage() {
 
       {/* Posts grid */}
       {isLoading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border bg-card p-5 h-[180px] flex flex-col justify-between">
+              <div>
+                <Skeleton className="h-6 w-3/4 mb-4" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-6 w-12 rounded-full" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : isError ? (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center text-sm text-destructive">
